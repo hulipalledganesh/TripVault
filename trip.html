@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TripVault — Travel Journal</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#f4f7fa;color:#173b57}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.hidden{display:none!important}
+.auth{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#173b57,#397391)}
+.auth-card{width:min(430px,100%);background:#fff;padding:34px;border-radius:24px;box-shadow:0 25px 70px #071d2d55}
+.logo{font-size:30px;font-weight:900;margin-bottom:5px}.sub{color:#698092;margin:0 0 24px}
+label{display:block;font-size:14px;font-weight:750;color:#36566d;margin:14px 0}
+input,textarea,select{width:100%;padding:12px;border:1px solid #ccd9e1;border-radius:10px;margin-top:7px;outline:0;background:#fff;color:#173b57}
+input:focus,textarea:focus,select:focus{border-color:#397391;box-shadow:0 0 0 3px #39739118}
+.primary{border:0;background:#173b57;color:white;border-radius:11px;padding:12px 17px;font-weight:800}
+.primary:hover{background:#245575}.link{color:#276282;font-weight:800;cursor:pointer}.auth-btn{width:100%;margin-top:10px}
+.msg{padding:11px 13px;border-radius:10px;margin:12px 0;font-size:14px}.error{background:#fff0f0;color:#a51d1d}.success{background:#eefaf2;color:#16713b}
+.auth-foot{text-align:center;color:#698092;font-size:14px;margin-top:18px}
+.app{min-height:100vh}.topbar{height:72px;background:#173b57;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,calc((100% - 1180px)/2))}
+.brand{font-size:22px;font-weight:900;display:flex;gap:9px;align-items:center}.brand span{font-size:24px}
+.logout{background:#ffffff12;color:white;border:1px solid #ffffff40;border-radius:10px;padding:9px 14px}
+.main{width:min(1180px,calc(100% - 36px));margin:auto;padding:45px 0}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:40px}.eyebrow{font-size:12px;letter-spacing:1.5px;font-weight:900;color:#4f7d9b;margin:0}
+h1{font-size:clamp(34px,5vw,52px);margin:7px 0;color:#173b57;letter-spacing:-1px}.hero p:not(.eyebrow){color:#687d8d;font-size:17px;margin:0}
+.add{display:flex;align-items:center;gap:7px}.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:15px}.toolbar h2{margin:0}.count{font-size:13px;background:#e5eef4;padding:4px 8px;border-radius:20px;color:#4f7d9b}.refresh{border:0;background:transparent;color:#4f7d9b;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:white;border:1px solid #dce5eb;border-radius:18px;padding:20px;box-shadow:0 8px 25px #173b5710}.card-head{display:flex;justify-content:space-between;gap:10px}.card h3{margin:0;color:#173b57;font-size:20px}.dest,.dates{color:#647b8b;display:flex;align-items:center;gap:7px;margin:8px 0}.rating{color:#b7791f;font-weight:800;white-space:nowrap}.notes{color:#526878;line-height:1.55}.actions{display:flex;gap:8px;margin-top:15px}.actions button{border:0;border-radius:9px;padding:9px 12px;font-weight:750}.edit{background:#edf4f8;color:#173b57}.delete{background:#fff0f0;color:#b42318}.empty,.loading{background:#fff;border:1px solid #dce5eb;border-radius:18px;text-align:center;padding:60px;color:#647b8b}.empty h3{color:#173b57;margin:10px}.modal{position:fixed;inset:0;background:#071d2d99;display:grid;place-items:center;padding:18px;z-index:10}.form{background:white;width:min(570px,100%);max-height:94vh;overflow:auto;padding:25px;border-radius:22px}.form-head{display:flex;justify-content:space-between}.close{border:0;background:#edf3f7;border-radius:9px;width:38px;height:38px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.cancel{border:0;background:#edf3f7;color:#36566d;border-radius:10px;padding:11px 16px;font-weight:750}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.hero{flex-direction:column;align-items:flex-start}.grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.main{padding-top:30px}}
+</style>
+</head>
+<body>
+
+<section id="auth" class="auth">
+  <form id="authForm" class="auth-card">
+    <div class="logo">✈️ TripVault</div>
+    <p id="authSub" class="sub">Your personal travel journal.</p>
+    <div id="authMsg"></div>
+    <div id="nameWrap" class="hidden"><label>Full name<input id="name" autocomplete="name"></label></div>
+    <label>Email<input id="email" type="email" required autocomplete="email"></label>
+    <label>Password<input id="password" type="password" required minlength="6" autocomplete="current-password"></label>
+    <button id="authBtn" class="primary auth-btn">Login</button>
+    <div class="auth-foot"><span id="switchText">Don't have an account?</span> <span id="switchBtn" class="link">Create account</span></div>
+  </form>
+</section>
+
+<section id="app" class="app hidden">
+<header class="topbar"><div class="brand">✈️ <span>TripVault</span></div><button id="logout" class="logout">Logout</button></header>
+<main class="main">
+<section class="hero"><div><p class="eyebrow">YOUR TRAVEL JOURNAL</p><h1>Every trip, safely kept.</h1><p id="welcome">Capture the places, dates and memories that matter.</p></div><button id="addTrip" class="primary add">＋ Add Trip</button></section>
+<div id="pageMsg"></div>
+<div class="toolbar"><h2>My Trips <span id="count" class="count">0</span></h2><button id="refresh" class="refresh">↻ Refresh</button></div>
+<div id="content"></div>
+</main>
+</section>
+
+<div id="modal" class="modal hidden">
+<form id="tripForm" class="form">
+<div class="form-head"><div><p class="eyebrow" id="formEyebrow">NEW TRIP</p><h2 id="formTitle">Add a memorable trip</h2></div><button type="button" id="close" class="close">✕</button></div>
+<div id="formMsg"></div>
+<label>Trip title *<input id="tTitle" required placeholder="Weekend in Goa"></label>
+<label>Destination *<input id="destination" required placeholder="Goa, India"></label>
+<div class="form-grid"><label>Start date *<input id="start" type="date" required></label><label>End date *<input id="end" type="date" required></label></div>
+<label>Rating *<select id="rating"><option value="5">5 / 5</option><option value="4">4 / 5</option><option value="3">3 / 5</option><option value="2">2 / 5</option><option value="1">1 / 5</option></select></label>
+<label>Notes<textarea id="notes" rows="4" placeholder="What made this trip special?"></textarea></label>
+<div class="form-actions"><button type="button" id="cancel" class="cancel">Cancel</button><button class="primary">Save Trip</button></div>
+</form>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let users=JSON.parse(localStorage.getItem("tripvault_users")||"[]");
+let trips=JSON.parse(localStorage.getItem("tripvault_trips")||"[]");
+let currentUser=JSON.parse(localStorage.getItem("tripvault_current")||"null");
+let mode="login", editingId=null;
+
+function save(){localStorage.setItem("tripvault_users",JSON.stringify(users));localStorage.setItem("tripvault_trips",JSON.stringify(trips));}
+function msg(el,text,type="error"){el.innerHTML=text?`<div class="msg ${type}">${text}</div>`:"";}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+function setMode(m){
+ mode=m; $("nameWrap").classList.toggle("hidden",m==="login");
+ $("authBtn").textContent=m==="login"?"Login":"Create Account";
+ $("authSub").textContent=m==="login"?"Your personal travel journal.":"Create your personal travel journal.";
+ $("switchText").textContent=m==="login"?"Don't have an account?":"Already have an account?";
+ $("switchBtn").textContent=m==="login"?"Create account":"Login";msg($("authMsg"),"");
+}
+$("switchBtn").onclick=()=>setMode(mode==="login"?"register":"login");
+
+$("authForm").onsubmit=e=>{
+ e.preventDefault();msg($("authMsg"),"");
+ const email=$("email").value.trim().toLowerCase(), password=$("password").value;
+ if(mode==="register"){
+   const name=$("name").value.trim();
+   if(!name)return msg($("authMsg"),"Please enter your name.");
+   if(users.some(u=>u.email===email))return msg($("authMsg"),"Email is already registered.");
+   const user={id:crypto.randomUUID(),name,email,password};
+   users.push(user);currentUser={id:user.id,name:user.name,email:user.email};save();openApp();
+ }else{
+   const u=users.find(x=>x.email===email&&x.password===password);
+   if(!u)return msg($("authMsg"),"Invalid email or password.");
+   currentUser={id:u.id,name:u.name,email:u.email};localStorage.setItem("tripvault_current",JSON.stringify(currentUser));openApp();
+ }
+};
+function openApp(){
+ localStorage.setItem("tripvault_current",JSON.stringify(currentUser));
+ $("auth").classList.add("hidden");$("app").classList.remove("hidden");
+ $("welcome").textContent=`Welcome back, ${currentUser.name}. Capture the places, dates and memories that matter.`;
+ render();
+}
+$("logout").onclick=()=>{currentUser=null;localStorage.removeItem("tripvault_current");$("app").classList.add("hidden");$("auth").classList.remove("hidden");$("authForm").reset();setMode("login");};
+
+function render(){
+ const mine=trips.filter(t=>t.userId===currentUser.id);
+ $("count").textContent=mine.length;
+ if(!mine.length){$("content").innerHTML=`<div class="empty"><div style="font-size:38px">🧳</div><h3>No trips yet</h3><p>Create your first trip and start building your travel journal.</p><button class="primary add" onclick="openForm()">＋ Add your first trip</button></div>`;return;}
+ $("content").innerHTML=`<div class="grid">${mine.map(t=>`<article class="card">
+ <div class="card-head"><div><h3>${escapeHtml(t.title)}</h3><div class="dest">📍 ${escapeHtml(t.destination)}</div></div><div class="rating">★ ${t.rating}/5</div></div>
+ <div class="dates">📅 ${format(t.startDate)} — ${format(t.endDate)}</div>
+ ${t.notes?`<div class="notes">${escapeHtml(t.notes)}</div>`:""}
+ <div class="actions"><button class="edit" onclick="openForm('${t.id}')">✎ Edit</button><button class="delete" onclick="removeTrip('${t.id}')">🗑 Delete</button></div>
+ </article>`).join("")}</div>`;
+}
+function format(d){return new Date(d+"T00:00:00").toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"});}
+$("addTrip").onclick=()=>openForm();
+$("refresh").onclick=render;
+function openForm(id=null){
+ editingId=id;
+ const t=id?trips.find(x=>x.id===id):null;
+ $("formEyebrow").textContent=t?"EDIT TRIP":"NEW TRIP";
+ $("formTitle").textContent=t?"Update your trip":"Add a memorable trip";
+ $("tTitle").value=t?.title||"";$("destination").value=t?.destination||"";
+ $("start").value=t?.startDate||"";$("end").value=t?.endDate||"";$("rating").value=t?.rating||5;$("notes").value=t?.notes||"";
+ msg($("formMsg"),"");$("modal").classList.remove("hidden");
+}
+function closeForm(){$("modal").classList.add("hidden");editingId=null}
+$("close").onclick=closeForm;$("cancel").onclick=closeForm;
+$("tripForm").onsubmit=e=>{
+ e.preventDefault();msg($("formMsg"),"");
+ const data={title:$("tTitle").value.trim(),destination:$("destination").value.trim(),startDate:$("start").value,endDate:$("end").value,rating:Number($("rating").value),notes:$("notes").value.trim()};
+ if(!data.title||!data.destination||!data.startDate||!data.endDate)return msg($("formMsg"),"Please fill all required fields.");
+ if(data.endDate<data.startDate)return msg($("formMsg"),"End date cannot be before start date.");
+ if(data.rating<1||data.rating>5)return msg($("formMsg"),"Rating must be between 1 and 5.");
+ if(editingId){const i=trips.findIndex(t=>t.id===editingId&&t.userId===currentUser.id);if(i>=0)trips[i]={...trips[i],...data};}
+ else trips.unshift({id:crypto.randomUUID(),userId:currentUser.id,...data,createdAt:new Date().toISOString()});
+ save();closeForm();render();
+};
+function removeTrip(id){
+ const t=trips.find(x=>x.id===id&&x.userId===currentUser.id);if(!t)return;
+ if(confirm(`Delete "${t.title}"?`)){trips=trips.filter(x=>x.id!==id);save();render();}
+}
+if(currentUser)openApp();else setMode("login");
+</script>
+</body>
+</html>
